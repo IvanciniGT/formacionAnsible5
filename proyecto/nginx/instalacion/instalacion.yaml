@@ -1,0 +1,17 @@
+
+-   name: Asegurarme que la versión solicitada de NGINX está instalada
+    tags:
+        - instalacion
+
+-   name: Asegurarme que el servicio de NGINX esté corriendo 
+          # Mirar los servicios y ver si el de nginx está corriendo
+          # Si no: Arrancarlo
+    tags:
+        - instalacion
+        - operacion
+        
+-   name: Asegurarme que el puerto de NGINX esté abierto 
+          # Mirar los servicios y ver si el de nginx está corriendo
+          # Si no: Arrancarlo
+    tags:
+        - instalacion

@@ -1,0 +1,8 @@
+app:
+    repo: https://github.com/miempresa/miapp1
+    version: 1.3.2
+    tests:
+        - url:      localhost:80/index.html
+          response: Bienvenido a la página web del banco!
+        - url:      localhost:80/contacto.html
+          response: Teléfono

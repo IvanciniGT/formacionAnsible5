@@ -1,0 +1,23 @@
+-   name: Pruebas
+    block: 
+        -   name: Asegurarnos que nginx realmente está en marcha
+                  # Mirar si el puerto 80 de la máquina está abierto y escuchando
+                  # Si esta falla, el problema lo tengo en nginx
+        
+        -   name: Asegurarnos que el despliegue se ha hecho correctamente
+                  # Llamada al puerto 80 y mirar lo que devuelve
+                  # Codigo de respuesta http: 200
+                  # Reviso un contenido: Que aparezcan tales palabras 
+                  # Si esta falla, el problema lo tengo en el despliegue de la app
+    rescue: 
+        # Esto permite definir tareas aicionales, que se ejecutarán SOLO si alguna
+        # de las tareas del bloque FALLA
+        -   name: Mandar un aviso a quien corresponda
+    tags:
+        - pruebas
+        - always        # TAG ESPECIAL DE ANSIBLE
+                        # Fuerza a que esto se ejecute siempre
+        
+        # ansible-playbook --tags instalacion
+        # ansible-playbook --tags configuracion
+        # ansible-playbook --tags pruebas

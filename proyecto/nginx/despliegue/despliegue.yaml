@@ -1,0 +1,5 @@
+-   name: Asegurarme que la versión solicitada de mi app está en la carpeta /var/www/html
+            # Si esta tarea provoca un cambio? 
+    notify: CONFIGURACION_NGINX_MODIFICADA
+    tags:
+        - despliegue

@@ -1,0 +1,8 @@
+-   name: Asegurarme que NGINX ha quedado configurado como me han solicitado
+          # 1º Mirar si ya existe un fichero de configuración
+          # 2º Si no existe o si el contenido de ese fichero es diferente del que me han solicitado
+          #     CAMBIARLO!
+          # En ficheros de configuracion !
+    notify: CONFIGURACION_NGINX_MODIFICADA
+    tags:
+        - configuracion

@@ -1,11 +1,27 @@
 -   hosts: localhost
     
     pre_tasks:
-        -   name: ESTO SI LO RELLENAIS 
-            when:
-            notify:
+        -   name: Lectura de las variables de nginx
+            include_tasks:
+                file: variables/nginx.yaml
+        -   name: Asegurarme que se cumplen los pre-requisitos
+            include_tasks:
+                file: requisitos/requisitos.yaml
     tasks:
-    
+        -   name: Asegurarme que nginx queda instalado y corriendo
+            include_tasks:
+                file: instalacion/instalacion.yaml
+        -   name: Asegurarme que nginx queda configurado
+            include_tasks:
+                file: configuracion/configuracion.yaml
+        -   name: Asegurarme que mi app queda desplegada
+            include_tasks:
+                file: despliegue/despliegue.yaml
     post_tasks:
-    
+        -   name: Realizar pruebas
+            include_tasks:
+                file: pruebas/pruebas.yaml
     handlers:
+        -   name:   Asegurar que el servicio de Nginx se reinicia
+            listen:
+                -   CONFIGURACION_NGINX_MODIFICADA
