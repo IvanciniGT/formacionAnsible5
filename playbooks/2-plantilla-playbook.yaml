@@ -1,0 +1,203 @@
+---
+- 
+    hosts: localhost
+    
+    gather_facts: True
+    
+    vars: # En Ansible EXISTEN MAS DE 20 sitios diferentes donde DEFINIR VARIABLES !
+          # Aquí solemos poner datos que nuestro playbook necesita y nos es conveniente/
+          # cómodo tener definidos al principio del fichero.
+        puerto: 80  # variable sencilla
+        # estructuras más complejas:
+        nginx:
+            puertos:
+                - 80
+                - 443
+            virtualServers:
+                - hostName:         miempresa.com
+                  documentRoot:     /var/www/miempresa
+                - hostName:         soporte.miempresa.com
+                  documentRoot:     /var/www/soporte
+                  
+        nivel_log: ERROR
+
+    pre_tasks:
+        -   name:   PreTarea 1
+            debug: 
+                msg: Soy la Pretarea 1
+
+        -   name:   PreTarea 2
+            debug: 
+                msg: Soy la Pretarea 2
+
+        -   name:   "PreTarea 3: Acceder a una variable propia"
+            debug: 
+                var: puerto
+    
+        -   name:   "PreTarea 4: Acceder a una variable más compleja"
+            debug: 
+                var: nginx.virtualServers[0].hostName
+        
+        # Dentro de los playbook, los textos que ponemos son procesados por una herramienta llamada JINJA2
+        # JINJA2? Es una libreria de PYTHON que permite montar/usar PLANTILLAS de TEXTOS
+        # Y tiene su prioa sintaxis.
+    
+        -   name:   "PreTarea 5: Plantilla JINJA BASICA: Interpolación de textos"
+            debug: 
+                msg: "El servidor web nginx debe funcionar en el puerto: {{ puerto }}"
+                
+        -   name:   "PreTarea 6: Plantilla JINJA BASICA 2"
+            debug: 
+                msg: "{{ puerto }}"
+                
+        -   name:   "PreTarea 7: Más variables"
+            debug: 
+                msg: "{{ nivel_log }}"
+            vars:  # Estas variables solo afectan a esa tarea concreta
+                nivel_log: INFO
+                
+        -   name:   "PreTarea 8: Más variables"
+            debug: 
+                msg: "{{ nivel_log }}"
+
+    tasks:
+        -   name:   Tarea 1
+            debug: 
+                msg: Soy la tarea 1
+        
+        # Control del flujo de tareas
+        
+        ## Tareas condicionales
+
+        -   name:   Tarea 2
+            debug: 
+                msg: Estoy ejecutándome en una máquina Ubuntu
+            when: ansible_facts.distribution == "Ubuntu"
+                  # Aqui ponemos una expresión que se va a procesar con JINJA, que ya autom. 
+                  # ANSIBLE le pone las {{}}.
+                  # Que debe devolver un valor lógico: True o False
+        -   name:   Tarea 3
+            debug: 
+                msg: Estoy ejecutándome en una máquina que NO ES Ubuntu
+            when: ansible_facts.distribution != "Ubuntu"
+            # Operadores: == != > < >= <= AND OR NOT
+
+        -   name:   Tarea 4
+            debug: 
+                msg: Estoy ejecutándome en una máquina Ubuntu con versión mayor que 15
+            when: ansible_facts.distribution == "Ubuntu" and ansible_facts.distribution_major_version > 15
+
+        -   name:   Tarea 5
+            debug: 
+                msg: Estoy ejecutándome en una máquina Ubuntu con versión mayor que 15
+            when: # Si dentro de un when meto una lista, Ansible anida esas expresiones con ANDs
+                - ansible_facts.distribution == "Ubuntu" 
+                - ansible_facts.distribution_major_version > 15
+        
+        # TAGS = ETIQUETAS
+        # Toda tarea de ansible debe llevar al menos 1 etiqueta
+        # Las etiquetas nos ayudan a:
+        # 1- Entender la naturaleza de la tarea que se está definiendo:
+        #           prueba, instalacion, configuración
+        # 2- Solicitar que de un playbook SOLO Se ejecuten las tareas con unos tags
+        # 3- Solicitar que de un playbook NO Se ejecuten las tareas con unos tags
+        # Eso lo hacemos al solicitar la ejecución del playbook.
+        # ansible-playbook --tags           # Solo tareas con los tags SUMINISTRADOS
+        #                  --skip-tags      # IGNORAR tareas con los tags SUMINSITRADOS
+        -   name:   Tarea 6
+            debug: 
+                msg: Tarea con etiqueta A
+            tags:
+                - A
+                
+        -   name:   Tarea 7
+            debug: 
+                msg: Tarea con etiqueta B
+            tags:
+                - B
+                
+        -   name:   Tarea 8
+            debug: 
+                msg: Tarea con etiqueta A y B
+            tags:
+                - A
+                - B
+                
+        ## Control del estado de ejecución de una tarea
+        -   name:   Tarea 9
+            debug: 
+                msg: Tarea que NO provoca CAMBIO, NUNCA !
+            notify: "handler 2"
+
+        -   name:   Tarea 10
+            debug: 
+                msg: Tarea que provoca CAMBIO, SIEMPRE !
+            changed_when: True # Aqui ponemos una expresión logica de nuevo (igual que en WHEN)
+            failed_when: False
+            notify: "handler 1"
+
+        -   name:   Tarea 11
+            debug: 
+                msg: Tarea que también provoca CAMBIO, SIEMPRE !
+            changed_when: True # Aqui ponemos una expresión logica de nuevo (igual que en WHEN)
+            notify: "handler 1"
+            
+        -   name:   Tarea 12
+            debug: 
+                msg: Tarea que solo está aquí para mostrar un mensajito
+
+    post_tasks:
+        -   name:   PostTarea 1
+            debug: 
+                msg: Soy la Posttarea 1
+            changed_when: True
+            notify: EVENTO1
+
+        -   name:   PostTarea 2
+            debug: 
+                msg: Soy la Posttarea 2
+    
+        -   name:   Asegurarse que el archivo /tmp/datos/datos.txt existe
+            shell:
+                cmd: |
+                        if [ ! -d /tmp/datos ]; then
+                            mkdir /tmp/datos
+                        fi
+                        if [ ! -f /tmp/datos/datos.txt ]; then
+                            touch /tmp/datos/datos.txt
+                            exit 111 # Si ha habido cambios
+                        fi
+                        exit 0 # Si no ha habido cambios
+            register: resultado # Guarda la información de vuelta de un modulo en una nueva VARIABLE
+            changed_when: resultado.rc == 111
+            failed_when:  resultado.rc != 111 and resultado.rc != 0
+            
+                        
+    
+    # Este bloque es un bloque muy especial.
+    # Este bloque se ejecuta DESPUES DE CADA UNO DE LOS BLOQUES ANTERIORES.
+    # Pero no se ejecutan TODAS las tareas de este bloque.
+    # Solo se ejecutan las tareas que hayan sido previamente ACTIVADAS
+    # Si una tarea HANDLER ha sido activada VARIAS veces, solo se ejecuta 1 vez
+    
+    # Como se activa un handler?
+    # Tienen que ocurrir 2 cosas:
+    # - Un handler es activado cuando una tarea PROVOCA CAMBIO
+    # - Y esa tarea tiene la palabra NOTIFY, con valor:
+    #       - El nombre del handler (NO SE USA NUNCA !!!!!!)
+    #       - Un evento que esté siendo escuchado por el handler
+    
+    handlers:
+        -   name:   handler 1
+            debug: 
+                msg: Soy el handler 1
+            listen:
+                - EVENTO1
+                - EVENTO2
+
+        -   name:   handler 2
+            debug: 
+                msg: Soy el handler 2
+            listen:
+                - EVENTO1
+    

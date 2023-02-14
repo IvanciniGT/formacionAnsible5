@@ -1,0 +1,70 @@
+# Cada item de la lista será un PLAY
+#- # Play 1
+#- # Play 2
+#- # Play 3
+# El conjunto de todos los plays que tenemos en un fichero lo llamamos PLAYBOOK.
+
+# Cada play es un conjunto de tareas que vamosa. ejecutar sobre unos cuantos entornos.
+
+# Un playbook en YAML es UNA LISTA
+# Un play en YAML es un DICCIONARIO
+
+# En cada play, debemos suministrar una serie de informaciones, que al menos contendrá:
+# - En que entornos debe ejecutarse el play
+# - Que tareas debo ejecutar.
+
+# Ansible TIENE UN DEFECTO GRANDE EN SU SINTAXIS (ESQUEMA)
+# Por un lado, me hablan continuamente de lenguaje DECLARATIVO.
+# Pero por otro, me hablan del concepto de TAREA ~> lenguaje IMPERATIVO.
+# Una mejor palabra, en lugar de tarea (task) sería ESTADO (el estado que quiero conseguir)
+
+---
+# PLAY 1
+- # Play que ejecutará (o asegurará el estado) de un numero de características.
+    hosts: localhost # Los entornos en los que este play se debe ejecutar
+                     # localhost, indica que este play debe ejecutarse en en propio entorno donde corre ansible
+                     # Esto no es NADA habitual. En el curso nos viene bien.
+                     # En la práctica, querremos que un entorno maestro admisnitre MULTIPLES nodos REMOTOS, distintos al 
+                     # nodo maestro.
+    gather_facts: True     # Esta es una tarea que Ansible EJECUTA POR DEFECTO, a no se que la DESACTIVE
+                            # Y SIEMPRE LA DESACTIVAREMOS... Ya hablaremos de ello !
+                            # Esta tarea consiste en EXTRAER DEL ENTORNO REMOTO, un montón de INFORMACIÓN:
+                            # MUCHISIMA INFORMACION, acerca de :
+                            # Características del hierro (hardware)
+                            #                 del Sistema Operativo
+                            #                 de la configuración:
+                            #                           red
+                            #                           firewall
+                            #                           servicios
+                            # Ansible guarda esa información en una variable, denominada "ansible_facts"
+                            # Podremos usar esa variable para acceder a las característcias del entorno remoto
+                            # Esta operación es MUY LENTA... ya que Ansible extrae MUCHA MUCHA MUCHA información
+                            # Información que en el 99% de los casos será IRRELEVANTE, al menos, la mayor parte de ella
+    
+    tasks:  # Tareas que deben ejecutar sobre los nodos definidos en HOSTS. Es una lista
+        # Cada tarea es un diccionario de YAML, donde se especifican MUCHAS COSAS... las iremos viendo.
+        -   name:   Tarea 1
+            #modulo:
+                # Configuración de ese modulo concreto.
+            # los módulos de ansible están diseñados de forma que soporten lenguaje DECLARTIVO ~> IDEMPOTENCIA
+            debug: 
+                msg: Soy la tarea 1
+
+        -   name:   Tarea 2
+            debug: 
+                msg: Soy la tarea 2
+
+        -   name:   Tarea 3
+            debug: 
+                msg: Soy la tarea 3
+                
+        -   name:   Tarea 4
+            debug: 
+                var: ansible_facts
+                
+        -   name:   Tarea 5
+            debug: 
+                var: ansible_facts.memory_mb.real.total
+
+                
+# Cuantas tareas se han ejecutado bien? 4????? Pero cuantas definido? 4

@@ -1,0 +1,198 @@
+# Podemos poder comentarios en los documentos YAML. ALELUYA !!!!                No se permiten JSON
+# Dentro de un archivo YAML, podemos tener MUCHOS DOCUMENTOS YAML. ALELUYA !!!  No se permite ni en XML, ni en JSON
+# Cada documento YAML, comienza por 3 guiones
+# Como excepción, el primer documento de un archivo puede no llevar los 3 guiones al inicio.
+# Opcionalmente, los documentos YAML pueden acabar con 3 puntos.
+# Esto es muy poco frecuente. En arhivos NO TIENE SENTIDO... y no debe usarse.
+# Solo tiene sentido si estamos TRANSMITIENDO estos documentos por una red
+...
+# Entre esto puede pasar mucho tiempo en una conexión STREAMING
+---
+# En un documento YAML encontramos un NODO
+---
+# En YAML hay 2 tipos de nodos: ESCALARES y COLECCION
+# Los nodos escalares albergan VALORES SUELTOS, DISCRETOS, SENCILLOS:
+---
+# Número: 
+3
+---
+-17
+---
+989.8
+---
+# Valores lógicos:
+true  # true  True  TRUE
+---
+false # false False FALSE
+---
+# NOTA. MUY RELEVANTE PARA ANSIBLE
+# En la versión 1.1 de la spec YAML se admitían como valores lógicos:
+yes # Yes YES
+no
+y
+n
+on
+off
+# Esto NO ES VALIDO EN YAML 1.2
+# COMENTARIO: En YAML 1.2 hicieron una MIERDA grande !
+# Cuando algo que está en un sistema, o que se puede usar, lo queremos quitar, qué hacemos siempre?
+# LO MARCAMOS COMO OBSOLEO (deprecated)
+# Y lo dejamos ahí un par de versiones... para dar tiempo a la gente a reemplazarlo.
+# EN YAML no se hizo.
+# Eso originó un CAOS. PARA paliarlo, muchos de los probramas que admiten YAML y que leen YAML, 
+# Siguen admitiendo algunas de estas sintaxis OBSOLTAS, que YA NO SON VALIDAS.
+# En Ansible se ve mucho el uso de yes/no en lugar de true/false
+---
+# Textos: POSIBLEMENTE LO MAS COMPLEJO EN YAML
+h'o"la #amigo
+---
+"h'o\"la #ami\\g\no"
+---
+'h''o"la #ami\g\no'
+---
+hola
+
+amigo
+---
+"hola
+
+amigo"
+---
+'hola
+
+amigo'
+---
+# Al final, estas sintaxis anteriores, las uso SOLO para textos sencillos
+# Por defecto, los textos los pondré SIN COMIMLLAS.
+# Si llevan dentro comillas simples o dobles, u otros caracteres especiales
+# entonces usaré la sintaxis con comillas que me sea más cómoda.
+---
+# Cuando quiero trabajar con textos más complejos.... Y NOS VA A SALIR MUY A MENUDO ESTE CASO
+# YAML ofrece otras 2 sintaxis diferentes: Literal / Folded
+---
+# Literal
+|-
+    Empiezo a escribir mi texto
+    En las lineas que quiera
+    Conteniendo caracteres raritos: ' " # \ \n \\ 
+
+
+---
+# Folded. Es especialmente util para comandos
+> 
+    docker container create
+        --name="micontenedor" 
+        -p 8080:80
+        -v '/datos:/tmp/datos'
+        imagen:latest
+
+---
+# Nodo vacio, NULO
+~
+---
+# En YAML hay varios nodos de tipo COLECCION.
+# En ansible usamos 2 de ellos: LISTAS ORDENADAS y los MAPAS DESORDENADOS
+---
+# Listas Ordenadas: Son conjuntos de nodos
+- item1
+- 2
+- True
+- 
+                            - subitem1
+                            - Subitem 2
+                            - 3
+                            - False
+---
+-   - A
+    - B
+---
+-   
+    - A
+    -        B
+---
+# Estos dos documentos YAML son iguales
+# YAML ofrece una segunda alterativa para escribir listas, inspirada en la sintaxis de JSON
+- 1
+- True
+- "hola"
+---
+[1, True, "hola" ]
+# Estas dos listas son equivalentes, iguales. ESTA ESTA PROHIBIDA EN YAML
+# Por qué? 
+# Primero, puede perecer más simple, cuando lo que hay dentro son datos sencillos...
+- item1
+- 2
+- True
+- 
+                            - subitem1
+                            - Subitem 2
+                            - 3
+                            - False
+---
+[ "item1", 2, True, ["subitem1", "subitem 2", 3, False]]
+---
+# Donde van a acabar estos archivos YAML que estamos escribiendo?
+# En estos archivos escribiremos por ejemplo UN PLAYBOOK... qué es un playbook a nivel conceptual: SCRIPT = PROGRAMA
+# Y donde se guarda el código de los programas? Donde exigimos a los desarrolladores que guarden su código? 
+# En un repositorio de un sistema de control de versión: GITLAB > servidor de alojamiento de respositorios remotos de GIT
+
+# Git, al igual que otros sistemas de control de verisón, identifica cambios a nivel de LINEA DE CODIGO.
+# Si uso la sintaxis de ABAJO: [], git NO SERA CAPAZ DE identificar el cambio concreto que hay en el documento. NO ES BUENO !
+---
+# El único caso de uso de la sintaxis anterior... la de los corchetes, es al escribir:
+[] # Una lista VACIA !
+--- 
+# DICCIONARIOS DESORDENADOS
+# Un diccionario desarodenado (tablas hash, tablas clave valor, arrays asociativos) es un conjunto de nodos, identificados por una clave.
+clave1: valor1
+clave2: valor2
+clave3: 3
+clave4: False
+clave5: ~
+clave6: 
+        - subitem1
+        - subitem2
+clave7:
+                            subclave1: 3
+                            subclave2: True
+---
+# Ejempplo real: Información de un servidor
+cpus: 8
+ram: 4Gbs
+usuarios:
+    - ivan
+    - administrador
+    - monitorizacion
+puertosAbiertos: []
+gpu: ~
+---
+# Ejempplo real: Información de un servidor 2
+cpus: 4
+ram: 16Gbs
+usuarios:
+    - administrador
+puertosAbiertos: 
+    - 8080
+    - 8443
+gpu: Nvindia XXXX
+---
+# Este es el tipo de documentos YAML más habitual... y el que encontramos en ANSIBLE
+clave1: valor1
+clave2: 2
+---
+clave2: 2
+clave1: valor1
+---
+# Estos 2 documentos son IGUALES. Hemos hablado de Diccionarios DESORDENADOS (es decir donde el orden NO ES RELEVANTE)
+---
+# YAML ofrece una sintaxis... un alfabeto: - : [] {} ~ & *... una grámatica
+# No ofrece una SEMANTICA COMPLETA, que hace falta en cualquier lenguaje
+# Qué palabras usamos como claves? Que tipos de datos tenemos que poner asociados a esas claves?
+
+# Cada programa que usa YAML, define su propio ESQUEMA DE DATOS.
+# Ese esquema define la estructura que debe tener UN DOCUMENTO yaml, para ser usada por ESE PROGRAMA CONCRETO.
+
+# ANSIBLE define su propio ESQUEMA, KUBERNETES el suyo.
+# Nuestro objetivo hasta Mañana es aprender el esquema que define ANSIBLE para que podamos escribir PLAYBOOKS (scripts)
+
+# Esto nos daría un nivel 5/10 de conocimientos de YAML. Suficiente para trabajar con ANSIBLE.

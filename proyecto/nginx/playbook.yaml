@@ -1,0 +1,11 @@
+-   hosts: localhost
+    
+    pre_tasks:
+        -   name: ESTO SI LO RELLENAIS 
+            when:
+            notify:
+    tasks:
+    
+    post_tasks:
+    
+    handlers:
