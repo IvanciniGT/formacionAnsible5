@@ -222,8 +222,18 @@
                 
                 
         # Esta ejecutará 2 veces: 443, 1433
-        -   name: Listar lo puertos fallidos 
+        -   name: Listar lo puertos y su rc 
             debug:
                 msg: |
-                        Este puerto ha fallado: 
+                        Este puerto: {{ item.item[1] }} acabó con rc: {{ item.rc }} 
+            loop: "{{ salida2.results }}"
             
+        -   name: Listar lo puertos que han fallao
+            when: item.rc > 0
+            debug:
+                msg: |
+                        Este puerto: {{ item.item[1] }} ha fallado
+            loop: "{{ salida2.results }}"
+            
+            # Cuando una tarea lleva loop y when, el when se aplica después del loop
+            # Dicho de otra forma, podemos usar el "item" en el when

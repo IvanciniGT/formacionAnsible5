@@ -46,11 +46,14 @@ Esta herramiemnta la podemos usar para:
 Herramienta que me ofrece:
 - Consola WEB centralizada desde la que poder ejecutar playbooks en entornos remotos
 - API REST para solicitar la ejecución de playbooks en entornos remotos
+- Orquestar playbooks
 - ...
 
 ### Ansible Galaxy - JUEVES/VIERNES
 
-???
+Es una herramienta que me permite crear y compartir ROLES
+
+ROLE: Conjunto de tareas reutilizable y parametrizable
 
 ---
 

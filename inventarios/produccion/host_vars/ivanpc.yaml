@@ -1,0 +1,5 @@
+ansible_host: 172.31.10.28  
+monitorizar:  True
+puertos:
+    - 80
+    - 22

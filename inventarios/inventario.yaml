@@ -1,0 +1,31 @@
+all:
+    children:
+        desarrolladores:
+            hosts:
+                ivanpc:
+                    ansible_host: 172.31.10.28  
+                    monitorizar:  True
+                    puertos:
+                        - 80
+                        - 22
+                danielpc:
+                    ansible_host: 172.31.10.29
+                jaumapc:  
+                    ansible_host: 172.31.10.30
+                victorpc: 
+                    ansible_host: 172.31.10.31
+                albertpc: 
+                    ansible_host: 172.31.10.32
+                asifpc:   
+                    ansible_host: 172.31.10.33
+            children:
+                portugal:
+                    hosts:
+                        joaopc:
+                            ansible_host: 172.31.10.35
+                        marcospc:
+                            ansible_host: 172.31.10.40
+            vars:
+                ansible_connection: ssh
+                ansible_user: admin
+                ansible_password: password
