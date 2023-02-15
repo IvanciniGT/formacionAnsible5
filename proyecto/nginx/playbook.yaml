@@ -2,7 +2,7 @@
     
     pre_tasks:
         -   name: Lectura de las variables de nginx
-            include_tasks:
+            include_vars:
                 file: variables/nginx.yaml
         -   name: Asegurarme que se cumplen los pre-requisitos
             include_tasks:

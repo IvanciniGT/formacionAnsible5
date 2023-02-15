@@ -1,0 +1,129 @@
+-   hosts: localhost
+    
+    gather_facts: False
+    
+    vars: 
+        usuarios: # Lista de diccionarios
+            - nombre: monitorizacion
+              contrasena: password
+              grupos: 
+                - monitor
+                
+            - nombre: consulta
+              contrasena: password2
+              grupos: 
+                - users
+                - guest
+
+            # COMENTARIOS: 
+                # Genial !
+                # Esta también tiene una cosita:
+                # No se controla que los nombres de usuario no se puedan repetir.
+
+        usuarios_otra_forma: # diccionario de listas
+            nombres: 
+                - monitorizacion
+                - consulta
+            contrasenas:
+                - password
+                - password2
+            grupos:
+                -  - monitor
+                -  - users
+                   - guest
+            # COMENTARIOS: 
+                # Deja las cosas un poco más explicitas? Un poco más
+                # Agrupa nombres entre si, las contraseñas entre si, 
+                # Y los grupos entre si.
+                # Me interesa agrupar eso? u otro?
+                # Conceptualmente que querria yo agrupar? 
+                # LOS DATOS DE UN USUARIO !
+                
+        usuarios_otra_forma_mas: # Lista de listas
+            -   - monitorizacion
+                - password
+                -  - monitor
+
+            -   - consulta
+                - password2
+                -  - users
+                   - guest 
+            # COMENTARIOS: 
+            #   RUINA:
+            #       1º A la que ponga mal un guioncito, la lio
+            #       2º La naturaleza de los datos que escribo no es EXPLICITA
+            #               SIEMPRE EXPLICITO !
+            
+        usuarios_otra_forma_mas_aun: # Diccionario de diccionarios
+            monitorizacion:
+                contrasena: password
+                grupos:
+                    - monitor
+            consulta:
+                contrasena: password2
+                grupos:
+                    - users
+                    - guest
+
+            # COMENTARIOS: 
+                # Genial !
+                # Ésta... tiene una cosita... y es que no me queda claro 
+                # aunque tampoco es dificil llegar a la conclusión
+                # qué es lo que se pone a primer nivel
+            
+    tasks:
+        -   name: Filtros de Jinja  
+            debug: 
+                msg: |
+                        Transformo el texto: {{ texto | upper }}
+                        Transformo el texto: {{ texto | lower }}
+                        Hay que crear {{ usuarios | length }} usuarios
+            vars:
+                texto: Soy un texto
+                ## Listado de filtros básicos de Jinja: https://jinja.palletsprojects.com/en/3.1.x/templates/#list-of-builtin-filters
+                ## Listado de filtros extendidos: https://docs.ansible.com/ansible/2.8/user_guide/playbooks_filters.html
+
+    
+        -   name: Asegurarnos que tenemos el usuario {{ item.nombre }} creado en el entorno  
+                  #Crear unos usuarios
+            debug: 
+                msg: |
+                        Miro a ver si el usuario {{ item.nombre }} no está creado.
+                        Si no lo está, lo creo con la contraseña: {{ item.contrasena }}
+                            
+            # Esta tarea la quieero ejecutar varias veces. Tantas veces como usurios tengamos
+            loop: "{{ usuarios }}" # Suministramos una lista
+                                   # La tarea se ejecuta para cada elemento de la lista
+                                   # A cada elemento me puedo referir con la variable "item"
+            
+
+        -   name: Asegurarnos que tenemos el usuario {{ item.nombre }} creado en el entorno  
+            debug: 
+                msg: |
+                        Miro a ver si el usuario {{ item.key }} no está creado.
+                        Si no lo está, lo creo con la contraseña: {{ item.value.contrasena }}
+                            
+            # loop: "{{ usuarios_otra_forma_mas_aun }}" Esto no funciona  ya que le estamos pasando un diccionario
+            # Solución: Transformar el diccionario en una lista !
+
+            loop: "{{ usuarios_otra_forma_mas_aun | dict2items }}" 
+            
+
+# clave1: valor1
+# clave2: valor2
+
+#       VVV
+#   dict2items
+#       VVV
+
+# - key: clave1
+#   value: valor1
+# - key: clave2
+#   value: valor2
+
+#item: 
+#    key:      monitorizacion
+#    value:
+#        contrasena: password
+#        grupos:
+#            - monitor
