@@ -127,3 +127,21 @@
 #        contrasena: password
 #        grupos:
 #            - monitor
+
+        -   name: Asegurarnos que abrimos unos puertos en el firewall  
+            debug: 
+                msg: | 
+                    Abro el puerto: XXXXX para el programa YYYYY
+            loop: "{{ programas }}"
+            vars:
+                programas:  
+                    sqlserver:
+                        version: 2022
+                        puertos:
+                            - 1433
+                    iis:
+                        version: 2022
+                        puertos:
+                            - 80
+                            - 443
+                            
