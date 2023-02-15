@@ -70,7 +70,16 @@
                 # Ésta... tiene una cosita... y es que no me queda claro 
                 # aunque tampoco es dificil llegar a la conclusión
                 # qué es lo que se pone a primer nivel
-            
+        programas:  
+            sqlserver:
+                version: 2022
+                puertos:
+                    - 1433  # Puerto 1
+            iis:
+                version: 2022
+                puertos:
+                    - 80    # Puerto 2
+                    - 443   # Puerto 3
     tasks:
         -   name: Filtros de Jinja  
             debug: 
@@ -129,19 +138,86 @@
 #            - monitor
 
         -   name: Asegurarnos que abrimos unos puertos en el firewall  
-            debug: 
-                msg: | 
-                    Abro el puerto: XXXXX para el programa YYYYY
-            loop: "{{ programas }}"
+            # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_loops.html#with-subelements
+            loop: "{{ programas | dict2items | subelements('value.puertos') }}"
             vars:
-                programas:  
-                    sqlserver:
-                        version: 2022
-                        puertos:
-                            - 1433
-                    iis:
+                programas_filter_dict2items:
+                    - key: sqlserver
+                      value: 
+                            version: 2022
+                            puertos:
+                                - 1433
+                    - key: iis
+                      value: 
                         version: 2022
                         puertos:
                             - 80
                             - 443
-                            
+                programas_filter_subelements:
+                    -  # Item 1
+                        - key: sqlserver
+                          value: 
+                            version: 2022
+                            puertos:
+                                - 1433
+                        - 1433
+                    -  # Item 2
+                        - key: iis
+                          value: 
+                            version: 2022
+                            puertos:
+                                - 80
+                                - 443
+                        - 80
+                    -  # Item 3
+                        - key: iis
+                          value: 
+                            version: 2022
+                            puertos:
+                                - 80
+                                - 443
+                        - 443
+            debug: 
+                msg: | 
+                    Abro el puerto: {{ item[1] }} para el programa {{ item[0].key }}
+
+#Para cada programa:
+#    Para cada puerto:
+#        print: abro el puerto del programa
+
+
+        -   name: Ejecuto un comando
+            shell:
+                cmd: echo "hola"
+            changed_when: False
+            register: salida    # Es un diccionario
+        
+        -   name: Consultar la completa del comando anterior
+            debug:
+                var: salida
+
+        -   name: Consultar la salida estandar y el código de respuesta del comando anterior
+            debug:
+                msg: |
+                        Salida estandar:     {{ salida.stdout }}
+                        Código de respuesta: {{ salida.rc }}
+
+
+        -   name: Asegurarme de lo que sea  
+            # https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_loops.html#with-subelements
+            loop: "{{ programas | dict2items | subelements('value.puertos') }}"
+            shell: 
+                cmd: | 
+                    [ {{ item[1] }} -eq 80 ] && exit 0 || exit 1
+                # Estoy simulando un comando cuyo comportamiento Si el puerto es el 80 acaba bien.
+                # Si el puerto no es el 80... acaba mal
+            register: salida2
+            #failed_when: False
+            ignore_errors: True # Las tareas quedan marcada como fallidas, pero el script (playbook) continua
+        
+        
+        -   name: Listar lo puertos fallidos 
+            debug:
+                msg: |
+                        Este puerto ha fallado: 
+            
