@@ -216,6 +216,12 @@
             ignore_errors: True # Las tareas quedan marcada como fallidas, pero el script (playbook) continua
         
         
+        -   name: Consultar la completa del comando anterior
+            debug:
+                var: salida2
+                
+                
+        # Esta ejecutará 2 veces: 443, 1433
         -   name: Listar lo puertos fallidos 
             debug:
                 msg: |
