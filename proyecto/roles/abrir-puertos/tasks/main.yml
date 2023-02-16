@@ -1,9 +1,20 @@
-- name: Cortar la ejecución del playbook
-  when: puerto is undefined # Si no me han dado un puerto
-  
 - name: Obtener el sistema operativo de la máquina
-
-- name: Asegurarme que el puerto queda abierto
+  setup:
+    gather_subset:
+      - distribution
+      - os_family
+  when: >
+     ansible_facts.distribution is undefined or ansible_facts.os_family is undefined
+  
+- name: Cortar la ejecución del playbook
+  meta: end_host
+  when: > 
+      ( ansible_facts.os_family    != 'Windows' and
+        ansible_facts.distribution != 'Ubuntu' and 
+        ansible_facts.os_family    != 'RedHat' )
+      or puerto is undefined
+    
+- name: Asegurarme que el puerto queda abierto si tengo máquina Windows
   win_firewall_rule:
         name:       "{{ nombre }}"
         localport:  "{{ puerto }}"
@@ -12,17 +23,19 @@
         protocol:   "{{ protocolo }}"
         state:      present
         enabled:    yes
-  when: ansible_facts.distribution == 'Windows' # Si tengo una máquina windows
-
-- name: Asegurarme que el puerto queda abierto si tengo una máquina ubuntu
-  when: ansible_facts.distribution == 'Ubuntu' # Si tengo una máquina ubuntu
+  when: ansible_facts.os_family    == 'Windows' # Si tengo una máquina windows
 
 - name: Asegurarme que el puerto queda abierto si tengo una máquina redhat
-  when: ansible_facts.distribution == 'Redhat' # Si tengo una máquina redhat
+  firewalld:
+    port: "{{ puerto }}/{{ protocolo }}"
+    permanent: true
+    state: enabled
+  when: ansible_facts.os_family    == 'RedHat' # Si tengo una máquina redhat
 
-- name: Cortar la ejecución del playbook
-  when: 
-    - ansible_facts.distribution != 'Windows' #Si tengo una máquina desconocida
-    - ansible_facts.distribution != 'Ubuntu'
-    - ansible_facts.distribution != 'Redhat'
-    
+- name: Asegurarme que el puerto queda abierto si tengo una máquina ubuntu
+  ufw:
+    rule: allow
+    port: "{{ puerto }}"
+    proto: "{{ protocolo }}"
+  become: True # Ponte como superusuario / administrador
+  when: ansible_facts.distribution == 'Ubuntu' # Si tengo una máquina ubuntu

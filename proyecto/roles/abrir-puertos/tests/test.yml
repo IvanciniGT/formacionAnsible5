@@ -1,5 +1,13 @@
 ---
 - hosts: localhost
   remote_user: root
-  roles:
-    - abrir-puertos
+  gather_facts: False
+  tasks:
+  
+    - name: Abrir el puerto 80
+      include_role:
+        name: abrir-puertos
+      vars:
+        puerto: 80
+        protocolo: tcp
+        nombre: "http"
