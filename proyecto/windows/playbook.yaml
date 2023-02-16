@@ -1,0 +1,48 @@
+-   hosts: windows
+
+    gather_facts: False
+
+    tasks: 
+        -   name: Mostrar los facts de la máquina
+            debug:
+                var:    ansible_facts
+        
+        -   name: Abrir puerto 80 en el firewall
+            include_role:
+                name: abrir-puertos
+            vars:
+                puerto: 80
+                protocolo: tcp
+                nombre: "http"
+        
+        -   name: Abrir puerto 8080 en el firewall
+            include_role:
+                name: abrir-puertos
+            vars:
+                puerto: 8080
+                protocolo: tcp
+                nombre: "Mi aplciación"
+                
+        
+        -   name: Crear usuario monitorizacion
+            win_user:
+                name: "{{ item.key }}"
+                password: "{{ item.value.contrasena }}"
+                state: present
+                groups: "{{ item.value.grupos }}"
+            loop: "{{ usuarios | dict2items }}"
+#                usuarios_como_lista:
+#                    - key: monitorizacion
+#                      value: 
+#                        contrasena: monitorizacion2023
+#                        grupos:
+#                            - Users
+        
+        -   name:  Crear la carpeta
+            win_file:
+                path: C:\Monitorizacion
+                state: directory
+        # C:\Monitorizacion
+
+#ansible-playbook -i inventario.ini playbook.yaml --extra-vars "@usuarios.yaml"
+        

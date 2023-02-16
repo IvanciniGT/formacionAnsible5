@@ -1,0 +1,9 @@
+usuarios:
+    monitorizacion:
+        contrasena: 93jfjf834DJFGHDcjklsd$%
+        grupos:
+            - Users
+    operacion:
+        contrasena: jksJDSGHFUY67384hdsghd&&
+        grupos:
+            - Users

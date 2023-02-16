@@ -1,0 +1,6 @@
+- name: Asegurarme que el puerto queda abierto en mi máquina ubuntu
+  ufw:
+    rule: allow
+    port: "{{ puerto }}"
+    proto: "{{ protocolo }}"
+  become: True # Ponte como superusuario / administrador

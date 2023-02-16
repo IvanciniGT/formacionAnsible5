@@ -47,7 +47,7 @@ Herramienta que me ofrece:
 - Consola WEB centralizada desde la que poder ejecutar playbooks en entornos remotos
 - API REST para solicitar la ejecución de playbooks en entornos remotos
 - Orquestar playbooks
-- ...
+- Centralizar las credenciales
 
 ### Ansible Galaxy - JUEVES/VIERNES
 

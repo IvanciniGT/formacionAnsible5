@@ -205,3 +205,27 @@ Esta es la estructura básica... La podría haber creado yo.
 El comando ansible-galaxy init lo ha hecho por mi.
 
 Puede ser que mi ROLE por su naturaleza, no necesite algunas de estas carpetas... las borro
+
+
+
+
+
+
+
+Familia de sistema operativo:
+
+Windows
+    distribuciones: Windows Server
+    distribution:   Windows pro
+
+Redhat:
+    distribution: Redhat
+    distribution: CentOS
+    distribution: Fedora
+    distribution: AmazonLinux
+
+Debian:
+    distribution: Debian
+    distribution: Ubuntu
+    distribution: Xubuntu
+    

@@ -1,0 +1,8 @@
+- 
+    hosts: windows 
+    gather_facts: True
+    tasks:      
+        -   name:   Tarea 1
+            debug: 
+                var: ansible_facts
+                

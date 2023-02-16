@@ -1,0 +1,8 @@
+sistemasOperativosAdmitidos:
+
+    distribuciones: 
+        - Ubuntu
+    familias:
+        - Windows
+        - Redhat
+    

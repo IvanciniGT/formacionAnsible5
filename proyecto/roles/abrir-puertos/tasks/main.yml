@@ -5,37 +5,19 @@
       - os_family
   when: >
      ansible_facts.distribution is undefined or ansible_facts.os_family is undefined
-  
+
+
 - name: Cortar la ejecución del playbook
   meta: end_host
   when: > 
-      ( ansible_facts.os_family    != 'Windows' and
-        ansible_facts.distribution != 'Ubuntu' and 
-        ansible_facts.os_family    != 'RedHat' )
+      (     ansible_facts.os_family    not in sistemasOperativosAdmitidos.familias 
+        and ansible_facts.distribution not in sistemasOperativosAdmitidos.distribuciones )
       or puerto is undefined
-    
-- name: Asegurarme que el puerto queda abierto si tengo máquina Windows
-  win_firewall_rule:
-        name:       "{{ nombre }}"
-        localport:  "{{ puerto }}"
-        action:     allow
-        direction:  in
-        protocol:   "{{ protocolo }}"
-        state:      present
-        enabled:    yes
-  when: ansible_facts.os_family    == 'Windows' # Si tengo una máquina windows
 
-- name: Asegurarme que el puerto queda abierto si tengo una máquina redhat
-  firewalld:
-    port: "{{ puerto }}/{{ protocolo }}"
-    permanent: true
-    state: enabled
-  when: ansible_facts.os_family    == 'RedHat' # Si tengo una máquina redhat
 
-- name: Asegurarme que el puerto queda abierto si tengo una máquina ubuntu
-  ufw:
-    rule: allow
-    port: "{{ puerto }}"
-    proto: "{{ protocolo }}"
-  become: True # Ponte como superusuario / administrador
-  when: ansible_facts.distribution == 'Ubuntu' # Si tengo una máquina ubuntu
+- name: Abrir el puerto
+  include_tasks:
+    file: >-
+              os/{{ (ansible_facts.os_family 
+                    if ansible_facts.os_family in sistemasOperativosAdmitidos.familias 
+                    else ansible_facts.distribution) | lower }}.yaml
