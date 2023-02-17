@@ -1,4 +1,4 @@
--   hosts: all
+-   hosts: windows
     
     vars:
         # Parametrizables:
@@ -32,14 +32,14 @@
         -   name: Hacernos con un instalador de Apache
             win_get_url:
                 url:                    "{{ url_instalador_apache }}"
-                dest:                   "{{ directorio_temporal }}/{{ nombre_archivo_instalacion }}"
+                dest:                   "{{ directorio_temporal }}\\{{ nombre_archivo_instalacion }}"
                 checksum:               "{{ sha1_instalador }}"
                 checksum_algorithm:     sha1
                 force:                  False
             
         -   name: Asegurar que el Apache queda instalado
             win_package:
-                path:                   "{{ directorio_temporal }}/{{ nombre_archivo_instalacion }}"
+                path:                   '{{ directorio_temporal }}\{{ nombre_archivo_instalacion }}'
                 state:                  present
             notify: CAMBIO_CONFIGURACION_APACHE
                 
@@ -78,5 +78,7 @@
     handlers:
         -   name: Reiniciar el servicio de Apache si hay cambios en la configuración
             win_service:
+                name:                   "{{ nombre_servicio}}"
+                state:                  restarted
             listen:
                 - CAMBIO_CONFIGURACION_APACHE
