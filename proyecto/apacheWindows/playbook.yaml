@@ -43,6 +43,7 @@
                 repo:                   "{{ repositorio_git_configuracion }}"
                 dest:                   "{{ directorio_clon_configuracion }}"
             delegate_to: localhost      # En la propia maquina que corre el playbook
+            changed_when: False
             tags:
                 - configuracion
             
