@@ -1,0 +1,11 @@
+
+# Parametrizables:
+url_instalador_apache:          https://archive.apache.org/dist/httpd/binaries/win32/httpd-2.2.25-win32-x86-no_ssl.msi
+sha1_instalador:                e52b16e6bd2930285ebae2e36e98bcfebb3fecbb
+repositorio_git_configuracion:  https://github.com/IvanciniGT/webEjemploAnsible
+puerto:                         81
+email_administrador_apache:     administrador@miempresa.com
+
+# Parametrizable ... pero no debería cambiar mucho
+ruta_archivo_configuracion:     C:\Program Files (x86)\Apache Software Foundation\Apache2.2\conf\httpd.conf
+comando_servicio:               C:\Program Files (x86)\Apache Software Foundation\Apache2.2\bin\httpd.exe -k runservice

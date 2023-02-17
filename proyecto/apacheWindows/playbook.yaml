@@ -1,17 +1,6 @@
 -   hosts: windows
-    
+    gather_facts: False
     vars:
-        # Parametrizables:
-        url_instalador_apache:          https://archive.apache.org/dist/httpd/binaries/win32/httpd-2.2.25-win32-x86-no_ssl.msi
-        sha1_instalador:                e52b16e6bd2930285ebae2e36e98bcfebb3fecbb
-        repositorio_git_configuracion:  https://github.com/IvanciniGT/webEjemploAnsible
-        puerto:                         80
-        email_administrador_apache:     administrador@miempresa.com
-        
-        # Parametrizable ... pero no debería cambiar mucho
-        ruta_archivo_configuracion:     C:\Program Files (x86)\Apache Software Foundation\Apache2.2\conf\httpd.conf
-        comando_servicio:               C:\Program Files (x86)\Apache Software Foundation\Apache2.2\bin\httpd.exe -k runservice
-        
         # No parametrizables
         directorio_temporal:            c:\temporal
         nombre_archivo_instalacion:     instalador_apache.msi
@@ -27,6 +16,8 @@
             win_file:
                 path:                   "{{ directorio_temporal }}"
                 state:                  directory
+            tags:
+                - instalacion
 
     tasks:
         -   name: Hacernos con un instalador de Apache
@@ -36,24 +27,32 @@
                 checksum:               "{{ sha1_instalador }}"
                 checksum_algorithm:     sha1
                 force:                  False
+            tags:
+                - instalacion
             
         -   name: Asegurar que el Apache queda instalado
             win_package:
                 path:                   '{{ directorio_temporal }}\{{ nombre_archivo_instalacion }}'
                 state:                  present
-            notify: CAMBIO_CONFIGURACION_APACHE
+            notify: APACHE_INSTALADO
+            tags:
+                - instalacion
                 
         -   name: Hacernos con la configuración de Apache
             git:
                 repo:                   "{{ repositorio_git_configuracion }}"
                 dest:                   "{{ directorio_clon_configuracion }}"
             delegate_to: localhost      # En la propia maquina que corre el playbook
+            tags:
+                - configuracion
             
         -   name: Asegurarme que Apache queda configurado 
-            win_copy:
+            win_template:
                 src:                    "{{ directorio_clon_configuracion }}/{{ nombre_archivo_configuracion }}"
                 dest:                   "{{ ruta_archivo_configuracion }}"
             notify: CAMBIO_CONFIGURACION_APACHE
+            tags:
+                - configuracion
 
         -   name: Asegurarme que tengo un servicio de apache y que el servicio de Apache queda corriendo
             win_service:
@@ -68,12 +67,17 @@
                 path:                   "{{ comando_servicio }}"
                 display_name:           "{{ nombre_servicio}}"
                 state:                  started
+                start_mode:             delayed
+            tags:
+                - instalacion
 
     post_tasks:
         -   name: Asegurarme que todo funciona correctamemte
             win_uri:
                 url:                    "http://localhost:{{ puerto }}/"
                 status_code:            200
+            tags:
+                - pruebas
 
     handlers:
         -   name: Reiniciar el servicio de Apache si hay cambios en la configuración
@@ -82,3 +86,4 @@
                 state:                  restarted
             listen:
                 - CAMBIO_CONFIGURACION_APACHE
+                - APACHE_INSTALADO
