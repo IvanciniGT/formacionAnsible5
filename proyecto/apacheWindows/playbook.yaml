@@ -1,0 +1,57 @@
+-   hosts: all
+    
+    vars:
+        # Parametrizables:
+        url_instalador_apache:          https://archive.apache.org/dist/httpd/binaries/win32/httpd-2.2.25-win32-x86-no_ssl.msi
+        sha1_instalador:                e52b16e6bd2930285ebae2e36e98bcfebb3fecbb
+        repositorio_git_configuracion:  https://github.com/IvanciniGT/webEjemploAnsible
+        puerto:                         80
+        email_administrador_apache:     administrador@miempresa.com
+        
+        # Parametrizable ... pero no debería cambiar mucho
+        ruta_archivo_configuracion:     C:\Program Files (x86)\Apache Software Foundation\Apache2.2\conf\httpd.conf
+        comando_servicio:               C:\Program Files (x86)\Apache Software Foundation\Apache2.2\bin\httpd.exe -k runservice
+        
+        # No parametrizables
+        directorio_temporal:            c:\temporal
+        carpeta_para_el_despliegue_web: c:\despliegues\web
+        nombre_servicio:                Servidor Web Apache
+    
+    pre_tasks:
+        -   name: Creamos carpetas temporales para los archivos necesarios
+            win_file:
+
+    tasks:
+        -   name: Hacernos con un instalador de Apache
+            win_get_url:
+            
+        -   name: Asegurar que el Apache queda instalado
+            win_package:
+                #c:\archivos de programa\apache
+            notify: CAMBIO_CONFIGURACION_APACHE
+                
+        -   name: Hacernos con la configuración de Apache
+            git:
+            
+        -   name: Asegurarme que Apache queda configurado 
+            win_copy:
+            notify: CAMBIO_CONFIGURACION_APACHE
+
+        -   name: Asegurarme que tengo un servicio de apache y que el servicio de Apache queda corriendo
+            win_service:
+                # Ver si tengo servicio de Apache
+                    # Si lo tengo? No hago nada
+                    # Si no lo tengo? Creo el servicio
+                
+                # Ver si está corriendo
+                    # Si está corriendo? No hago nada. Queda asegurado
+                    # Si no está corriendo? Lo arranco.
+    post_tasks:
+        -   name: Asegurarme que todo funciona correctamemte
+            win_uri:
+
+    handlers:
+        -   name: Reiniciar el servicio de Apache si hay cambios en la configuración
+            win_service:
+            listen:
+                - CAMBIO_CONFIGURACION_APACHE
