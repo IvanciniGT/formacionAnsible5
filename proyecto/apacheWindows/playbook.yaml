@@ -14,27 +14,45 @@
         
         # No parametrizables
         directorio_temporal:            c:\temporal
+        nombre_archivo_instalacion:     instalador_apache.msi
         carpeta_para_el_despliegue_web: c:\despliegues\web
         nombre_servicio:                Servidor Web Apache
+        
+        # Estos datos se usan en la proppia maquina que corre el playbook
+        directorio_clon_configuracion:  "/tmp/configuracion-apache"
+        nombre_archivo_configuracion:   "configuracion.apache"
     
     pre_tasks:
         -   name: Creamos carpetas temporales para los archivos necesarios
             win_file:
+                path:                   "{{ directorio_temporal }}"
+                state:                  directory
 
     tasks:
         -   name: Hacernos con un instalador de Apache
             win_get_url:
+                url:                    "{{ url_instalador_apache }}"
+                dest:                   "{{ directorio_temporal }}/{{ nombre_archivo_instalacion }}"
+                checksum:               "{{ sha1_instalador }}"
+                checksum_algorithm:     sha1
+                force:                  False
             
         -   name: Asegurar que el Apache queda instalado
             win_package:
-                #c:\archivos de programa\apache
+                path:                   "{{ directorio_temporal }}/{{ nombre_archivo_instalacion }}"
+                state:                  present
             notify: CAMBIO_CONFIGURACION_APACHE
                 
         -   name: Hacernos con la configuración de Apache
             git:
+                repo:                   "{{ repositorio_git_configuracion }}"
+                dest:                   "{{ directorio_clon_configuracion }}"
+            delegate_to: localhost      # En la propia maquina que corre el playbook
             
         -   name: Asegurarme que Apache queda configurado 
             win_copy:
+                src:                    "{{ directorio_clon_configuracion }}/{{ nombre_archivo_configuracion }}"
+                dest:                   "{{ ruta_archivo_configuracion }}"
             notify: CAMBIO_CONFIGURACION_APACHE
 
         -   name: Asegurarme que tengo un servicio de apache y que el servicio de Apache queda corriendo
@@ -46,9 +64,16 @@
                 # Ver si está corriendo
                     # Si está corriendo? No hago nada. Queda asegurado
                     # Si no está corriendo? Lo arranco.
+                name:                   "{{ nombre_servicio}}"
+                path:                   "{{ comando_servicio }}"
+                display_name:           "{{ nombre_servicio}}"
+                state:                  started
+
     post_tasks:
         -   name: Asegurarme que todo funciona correctamemte
             win_uri:
+                url:                    "http://localhost:{{ puerto }}/"
+                status_code:            200
 
     handlers:
         -   name: Reiniciar el servicio de Apache si hay cambios en la configuración
